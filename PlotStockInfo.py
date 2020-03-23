@@ -29,13 +29,14 @@ def get_stock_data(tick, metric, timeStart, timeEnd):
 
 # plot data
 i = 0
-for i in range(len(metricsList)):
+for i in range(len(metricsList)):   # iterate through metrics
     dataList = pd.DataFrame({})  # make pandas dataframe to store information of current metric
     j = 0
-    for j in range(len(stocksList)):
+    for j in range(len(stocksList)):    # iterate through stocks
+        # append stock data for current metric onto dataframe
         dataList[stocksList[j]] = get_stock_data(stocksList[j], metricsList[i], timeStart, timeEnd)
 
-        # plot all stock's data for current metric
+    # plot all stock's data for current metric
     dataList.plot(title=metricsList[i])
 
     plt.xlabel('Date')
