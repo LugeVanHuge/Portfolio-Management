@@ -6,19 +6,23 @@ import matplotlib.pyplot as plt
 # Uses price history of a list of stocks to plot risk/reward efficiency frontier based off Modern Portfolio Theory.
 # Returns are considered bi-monthly.
 
-stockInput = input("Enter a comma-space-separated stock tickers list. e.g. MSFT, GOOG, AMZN:\n")
-timeRange = input("Enter a time period from the following:\n3mo, 6mo, "
-                  "1y, 2y, 5y, 10y, ytd, max.\n")
-resolution = int(input("Enter an integer portfolio weighting resolution percentage. e.g. res = 20 will permute "
-                       "weightings in 20% increments:\n"))
+# stockInput = input("Enter a comma-space-separated stock tickers list. e.g. MSFT, GOOG, AMZN:\n")
+# time_range = input("Enter a time period from the following:\n3mo, 6mo, "
+               #   "1y, 2y, 5y, 10y, ytd, max.\n")
+# resolution = int(input("Enter an integer portfolio weighting resolution percentage. e.g. res = 20 will permute "
+               #        "weightings in 20% increments:\n"))
+
+stockInput = "AMZN, GOOG, MSFT"
+time_range = "5y"
+resolution = 20
+
 resolution = int(100/resolution)    # convert percentage to a fraction of 100%
 
-
 # get history of stock delta (close-open) as a percentage
-def getDeltaHistory(tick, timeRange):
+def getDeltaHistory(tick, time_range):
 
     ticker = yf.Ticker(tick)    # get yf ticker from input
-    ticker_hist = ticker.history(period=timeRange)    # generate history of ticker
+    ticker_hist = ticker.history(period=time_range)    # generate history of ticker
     closeList = ticker_hist['Close']    # get close values from history
     openList = ticker_hist['Open']      # get open values from history
 
@@ -33,14 +37,14 @@ def getDeltaHistory(tick, timeRange):
 
 # get mean daily delta for a stock
 def getMean(tick):
-    deltaList = getDeltaHistory(tick, timeRange)    # get delta list
+    deltaList = getDeltaHistory(tick, time_range)    # get delta list
 
     return deltaList.mean()      # get mean of daily deltas
 
 
 # get standard deviation of daily deltas for a stock
 def getsDev(tick):
-    deltaList = getDeltaHistory(tick, timeRange)    # get delta list
+    deltaList = getDeltaHistory(tick, time_range)    # get delta list
     deltasDev = deltaList.std()
 
     return deltasDev
@@ -71,14 +75,14 @@ def portfolio_return(portfolio):
 
 
 # find weighted risk (sDev) of entire portfolio
-def portfolio_risk(portfolio, timeRange):
+def portfolio_risk(portfolio, time_range):
 
     # generate data frame of stock deltas
-    sDevFrame = pd.DataFrame([[0]*len(portfolio)]*len(getDeltaHistory(portfolio[0].tick, timeRange)))
+    sDevFrame = pd.DataFrame([[0]*len(portfolio)]*len(getDeltaHistory(portfolio[0].tick, time_range)))
 
     i = 0
     for i in range(len(portfolio)):
-        sDevFrame[i] = getDeltaHistory(portfolio[i].tick, timeRange)
+        sDevFrame[i] = getDeltaHistory(portfolio[i].tick, time_range)
 
     covMatrix = sDevFrame.cov()     # covariance matrix of portfolio
     covMatrix = np.array(covMatrix)
@@ -160,7 +164,7 @@ for i in range(len(weightsList)):
 
     weight_markers[i] = weightsList[i]       # get weighting marker
 
-    risk_return[i][0] = portfolio_risk(portfolio, timeRange)        # assign risk according to given weight matrix
+    risk_return[i][0] = portfolio_risk(portfolio, time_range)        # assign risk according to given weight matrix
     risk_return[i][1] = portfolio_return(portfolio)                 # assign return
 
 weight_markers = np.array(weight_markers)*resolution_scale
@@ -169,6 +173,7 @@ weight_markers = np.array(weight_markers)*resolution_scale
 fig = plt.figure()
 ax = fig.add_subplot(111)
 plt.scatter(risk_return[:, 0], risk_return[:, 1], s=None, c='#ff0000', marker='.')
+plt.title(stockNames)
 plt.xlabel("Portfolio Risk")
 plt.ylabel("Portfolio Return")
 k = 0
